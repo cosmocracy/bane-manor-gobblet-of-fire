@@ -6,13 +6,17 @@ import numpy as np
 import random
 import RPi.GPIO as GPIO
 import time
+import web, thread
+import Enum
 
+# Raspberry pin setup
 ir_detector_pin = 16
-
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(ir_detector_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.add_event_detect(ir_detector_pin, GPIO.FALLING, bouncetime=1000)
 
-#unicorn.brightness(0.25)
+# Constants related to visual effects
+modes = Enum('flame-red', 'flame-green', 'flame-teal', 'flame-blue', 'flame-pink', 'rainbow')
 hue_spread = 0.05          # +/- 5% hue deviation
 hue_centroid_red   = 0.05
 hue_centroid_green = 1.25
@@ -22,22 +26,19 @@ hue_centroid_pink  = 2.9
 pixel_chg_thresh = 0.5
 brightness_centroid = 0.5
 brightness_spread = 0.3
-mode_rainbow = 5
 
+mode_flame_red
+mode_rainbow = 5
+rainbow_i = 0.0
+rainbox_offset = 30
+
+
+modes = [hue_centroid_red, hue_centroid_green, hue_centroid_gof, hue_centroid_blue, hue_centroid_pink, mode_rainbow]
 unicorn.brightness(0.7)
 
 
-centroids = [hue_centroid_red, hue_centroid_green, hue_centroid_gof, hue_centroid_blue, hue_centroid_pink, mode_rainbow]
+mode_index = 0
 
-#def waive_detected(pin):
-#	centroid_index = centroid_index + 1
-
-#GPIO.add_event_detect(ir_detector_pin, GPIO.FALLING, callback=waive_detected, bouncetime=1000)
-GPIO.add_event_detect(ir_detector_pin, GPIO.FALLING, bouncetime=1000)
-
-centroid_index = 0
-i = 0.0
-offset = 30
 
 while True:
 	if GPIO.event_detected(ir_detector_pin):
