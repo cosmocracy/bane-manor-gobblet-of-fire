@@ -7,7 +7,6 @@ import random
 import RPi.GPIO as GPIO
 import time
 import web, thread
-import Enum
 
 # Raspberry pin setup (read IR off GPIO physical pin #16 using a pull-down resistor; 1.0sec bounce attenuation)
 ir_detector_pin = 16
@@ -24,7 +23,7 @@ class GobletMode(object):
 	def __init__(self, name):
 		self.name = name
 	# Abstract method--subclasses implement to provide mode-specific servicing of time slices (and delay, if desired)
-	def timeslice:
+	def timeslice(self):
 		raise NotImplementedError("Abstract base class--Implement this method!")
 		
 class FlameMode(GobletMode):
@@ -40,18 +39,18 @@ class FlameMode(GobletMode):
 		self.hue_centroid = hue_centroid
 		
 	# Provide flame-specific timeslice handling
-	def timeslice:
-		unicorn.brightness(flame_brightness_centroid + random.random() * flame_brightness_spread)
+	def timeslice(self):
+		unicorn.brightness(FlameMode.flame_brightness_centroid + random.random() * FlameMode.flame_brightness_spread)
 		# Initialize an 8x8 matrix of random numbers (between 0.0 and 1.0)
-		led_matrix = np.random.rand(8,8)	
+		led_matrix = np.random.rand(8,8)
 		# For each Y position
 		for y in range(8):
 			# For each X position
 			for x in range(8):
 				# Determine (randomly) if this pixel should switch to the new color yet (for a visual fade transition)
-				if random.random() > flame_pixel_chg_thresh:
+				if random.random() > FlameMode.flame_pixel_chg_thresh:
 					# Let the hue vary about the flame color's centroid by the spread scaled by the cell's random value
-					h = hue_centroid + flame_hue_spread * led_matrix[x, y]
+					h = self.hue_centroid + FlameMode.flame_hue_spread * led_matrix[x, y]
 					# Lock in color saturation at 80%
 					s = 0.8
 					# Make the brightness equal to the random value
@@ -74,8 +73,8 @@ class RainbowMode(GobletMode):
 	offset = 30
 		
 	# Provide rainbow-specific timeslice handling
-	def timeslice:
-	        i = i + 0.3
+	def timeslice(self):
+	        RainbowMode.i = RainbowMode.i + 0.3
         	for y in range(8):
                 	for x in range(8):
                         	r = 0
@@ -84,9 +83,9 @@ class RainbowMode(GobletMode):
                 	        r = (math.cos((x+i)/2.0) + math.cos((y+i)/2.0)) * 64.0 + 128.0
                         	g = (math.sin((x+i)/1.5) + math.sin((y+i)/2.0)) * 64.0 + 128.0
 	                        b = (math.sin((x+i)/2.0) + math.cos((y+i)/1.5)) * 64.0 + 128.0
-        	                r = max(0, min(255, r + offset))
-                	        g = max(0, min(255, g + offset))
-                        	b = max(0, min(255, b + offset))
+        	                r = max(0, min(255, r + RainbowMode.offset))
+                	        g = max(0, min(255, g + RainbowMode.offset))
+                        	b = max(0, min(255, b + RainbowMode.offset))
 	                        unicorn.set_pixel(x,y,int(r),int(g),int(b))
         	unicorn.show()
 	        time.sleep(0.01)
